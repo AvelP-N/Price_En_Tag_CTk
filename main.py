@@ -131,7 +131,7 @@ class XmlFile(XlsBook):
         if data.ctype == 1:  # Если тип данных строка
             edit_deadline = re.findall(r'\d+', data.value)
             if edit_deadline:
-                self.correction_data += f"{code_test}  -  Deadline < {data.value} > changed < {edit_deadline[-1]}\n"
+                self.correction_data += f"{code_test}  -  Deadline < {data.value} > changed < {edit_deadline[-1]} >\n"
                 return edit_deadline[-1]
         elif data.ctype == 2:  # Если тип данных числовой
             return str(int(float(data.value)))
@@ -147,7 +147,7 @@ class App(customtkinter.CTk, XmlFile, XlsBook,):
     def __init__(self):
         super().__init__()
 
-        self.title("Price En Tag v1.0")
+        self.title("Price En Tag v1.1")
         self.resizable(False, False)
         customtkinter.set_appearance_mode("dark")
 
