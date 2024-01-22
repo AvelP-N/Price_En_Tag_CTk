@@ -18,6 +18,7 @@ class XlsBook:
     code = None
     name = None
     price = None
+    price2 = None
     term = None
     count_tag = 0
 
@@ -38,17 +39,15 @@ class XlsBook:
     def check_selected_tag(self):
         """Проверка, какие теги выбраны и их количество"""
 
-        tags = self.get_count_tag(self.code, self.name, self.price, self.term)
+        tags = self.get_count_tag(self.code, self.name, self.price, self.price2, self.term)
 
         if tags < 3:
             return "Count tags < 3"
-        elif tags == 3:
+        else:
             if self.get_count_tag(self.code, self.name, self.price) == 3:
-                self.count_tag = 3
+                self.count_tag = tags
             else:
                 return "Tags are required: < testShortName >, < testName >, < testPrice >"
-        else:
-            self.count_tag = 4
 
     @staticmethod
     def get_count_tag(*args):
@@ -95,6 +94,11 @@ class XmlFile(XlsBook):
                 # Создать тег testPrice и проверка цены
                 price = ET.SubElement(main_price, "testPrice")
                 price.text = self.check_price(str(row[self.price].value).strip(), str(row[self.code].value).strip())
+
+                # Создать тег testPrice2 и проверка цены
+                if isinstance(self.price2, int):
+                    price2 = ET.SubElement(main_price, "testPrice2")
+                    price2.text = self.check_price(str(row[self.price2].value).strip(), str(row[self.code].value).strip())
 
                 # Создать тег term
                 if isinstance(self.term, int):
@@ -147,7 +151,7 @@ class App(customtkinter.CTk, XmlFile, XlsBook,):
     def __init__(self):
         super().__init__()
 
-        self.title("Price En Tag v1.1")
+        self.title("Price En Tag v1.3")
         self.resizable(False, False)
         customtkinter.set_appearance_mode("dark")
 
@@ -179,21 +183,25 @@ class App(customtkinter.CTk, XmlFile, XlsBook,):
         self.middle_frame = customtkinter.CTkFrame(self)
         self.middle_frame.pack(padx=10, pady=10, fill=tkinter.BOTH)
 
-        self.test_short_name_label = customtkinter.CTkLabel(master=self.middle_frame, width=90, text="testShortName",
+        self.test_short_name_label = customtkinter.CTkLabel(master=self.middle_frame, width=90, text="<testShortName>",
                                                             text_color="grey", font=("Times New Roman", 14, "bold"))
         self.test_short_name_label.grid(row=0, column=0, padx=10)
 
-        self.test_name_label = customtkinter.CTkLabel(master=self.middle_frame, width=90, text="testName",
+        self.test_name_label = customtkinter.CTkLabel(master=self.middle_frame, width=90, text="<testName>",
                                                       text_color="grey", font=("Times New Roman", 14, "bold"))
         self.test_name_label.grid(row=0, column=1, padx=10)
 
-        self.test_price_label = customtkinter.CTkLabel(master=self.middle_frame, width=90, text="testPrice",
+        self.test_price_label = customtkinter.CTkLabel(master=self.middle_frame, width=90, text="<testPrice>",
                                                        text_color="grey", font=("Times New Roman", 14, "bold"))
         self.test_price_label.grid(row=0, column=2, padx=10)
 
-        self.test_term_label = customtkinter.CTkLabel(master=self.middle_frame, width=90, text="term",
+        self.test_price2_label = customtkinter.CTkLabel(master=self.middle_frame, width=90, text="<testPrice2>",
+                                                        text_color="grey", font=("Times New Roman", 14, "bold"))
+        self.test_price2_label.grid(row=0, column=3, padx=10)
+
+        self.test_term_label = customtkinter.CTkLabel(master=self.middle_frame, width=90, text="<term>",
                                                       text_color="grey", font=("Times New Roman", 14, "bold"))
-        self.test_term_label.grid(row=0, column=3, padx=10)
+        self.test_term_label.grid(row=0, column=4, padx=10)
 
         self.test_short_name_box = customtkinter.CTkComboBox(master=self.middle_frame, values=["0"], width=60,
                                                              text_color="black", command=self.get_test_short_name)
@@ -207,9 +215,13 @@ class App(customtkinter.CTk, XmlFile, XlsBook,):
                                                         text_color="black", command=self.get_test_price)
         self.test_price_box.grid(row=1, column=2, padx=10, pady=10)
 
+        self.test_price2_box = customtkinter.CTkComboBox(master=self.middle_frame, values=["0"], width=60,
+                                                         text_color="black", command=self.get_test_price2)
+        self.test_price2_box.grid(row=1, column=3, padx=10, pady=10)
+
         self.test_term_box = customtkinter.CTkComboBox(master=self.middle_frame, values=["0"], width=60,
                                                        text_color="black", command=self.get_test_term)
-        self.test_term_box.grid(row=1, column=3, padx=10, pady=10)
+        self.test_term_box.grid(row=1, column=4, padx=10, pady=10)
 
         # Рамка с кнопками парсинга XLS листов и создания XML файла
         self.bottom_frame = customtkinter.CTkFrame(self)
@@ -263,11 +275,11 @@ class App(customtkinter.CTk, XmlFile, XlsBook,):
         self.code = None
         self.name = None
         self.price = None
+        self.price2 = None
         self.term = None
         self.count_tag = 0
         self.root = ET.Element('root')
         self.root.set('xmlns:xsi', "http://www.w3.org/2001/XMLSchema-instance")
-        self.count_tag = 0
         self.found_code_test = 0
         self.correction_data = ""
 
@@ -281,6 +293,8 @@ class App(customtkinter.CTk, XmlFile, XlsBook,):
         self.test_name_box.set("0")
         self.test_price_box.configure(values=["0"], text_color="black")
         self.test_price_box.set("0")
+        self.test_price2_box.configure(values=["0"], text_color="black")
+        self.test_price2_box.set("0")
         self.test_term_box.configure(values=["0"], text_color="black")
         self.test_term_box.set("0")
 
@@ -288,6 +302,13 @@ class App(customtkinter.CTk, XmlFile, XlsBook,):
 
     def get_sheet_cols(self, sheet):
         """Пользовательский выбор листа и колонок"""
+
+        # Сбросить значения колонок на дефолтные
+        self.code = None
+        self.name = None
+        self.price = None
+        self.price2 = None
+        self.term = None
 
         self.label_sheet.configure(text=f"Selected sheet:  {sheet}")
 
@@ -305,6 +326,8 @@ class App(customtkinter.CTk, XmlFile, XlsBook,):
         self.test_name_box.set("0")
         self.test_price_box.configure(values=list_column, text_color="black")
         self.test_price_box.set("0")
+        self.test_price2_box.configure(values=list_column, text_color="black")
+        self.test_price2_box.set("0")
         self.test_term_box.configure(values=list_column, text_color="black")
         self.test_term_box.set("0")
 
@@ -335,6 +358,15 @@ class App(customtkinter.CTk, XmlFile, XlsBook,):
             self.price = None
             self.test_price_box.configure(text_color="black")
 
+    def get_test_price2(self, number):
+
+        if int(number) > 0:
+            self.price2 = int(number) - 1
+            self.test_price2_box.configure(text_color="white")
+        else:
+            self.price2 = None
+            self.test_price2_box.configure(text_color="black")
+
     def get_test_term(self, number):
 
         if int(number) > 0:
@@ -352,7 +384,7 @@ class App(customtkinter.CTk, XmlFile, XlsBook,):
 
         if count_tags == "Count tags < 3":
             self.text_box.insert(tkinter.END, f"Count tags < 3\n")
-            self.text_box.insert(tkinter.END, "Please select 3 or 4 tags!\n\n")
+            self.text_box.insert(tkinter.END, "Please select 3 - 5 tags!\n\n")
             self.text_box.see(tkinter.END)
         elif count_tags == "Tags are required: < testShortName >, < testName >, < testPrice >":
             self.text_box.insert(tkinter.END, f"{count_tags}\n\n")
